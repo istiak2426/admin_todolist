@@ -48,7 +48,7 @@ class App extends Component {
                 <div className="App">
                     <div className="App-header">
                         <img src={logo} className="App-logo" alt="logo"/>
-                        <h2>React Firebase Authentication User Based Todo List (Class component) </h2>
+                        <h2>React Firebase Authentication User Based Todo List (transforming into functional component) </h2>
                     </div>
 
                     <nav className="navbar navbar-default navbar-static-top">
