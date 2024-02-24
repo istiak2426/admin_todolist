@@ -1,103 +1,86 @@
-/**
- * Created by bikramkawan on 9/1/17.
- */
-import React, {Component} from 'react';
-import {usersWishlist} from '../Firebase'
+import React, { useState, useEffect, useCallback } from "react";
+import { usersWishlist } from "../Firebase";
 
-class Dashboard extends Component {
+const Dashboard = ({ userid }) => {
+  const [wishlist, setWishlist] = useState("");
+  const [completeWishlist, setCompleteWishlist] = useState([]);
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            wishlist: '',
-            completeWishlist: []
-        }
+  const removeWishlist = useCallback(
+    (index) => {
+      const thisUser = usersWishlist.child(userid);
+      let updatedWishlist = completeWishlist.slice();
+      updatedWishlist.splice(index, 1);
+      setCompleteWishlist(updatedWishlist);
+      thisUser.set({ completeWishlist: updatedWishlist });
+    },
+    [completeWishlist, userid]
+  );
 
-    }
+  const addWishlist = useCallback(() => {
+    const thisUser = usersWishlist.child(userid);
+    const updatedWishlist = [...completeWishlist, wishlist];
+    setCompleteWishlist(updatedWishlist);
+    thisUser.set({ completeWishlist: updatedWishlist });
+  }, [completeWishlist, wishlist, userid]);
 
-    removeWishlist = (index) => {
-        const {userid} = this.props;
-        const thisUser = usersWishlist.child(userid);
-        let completeWishlist = this.state.completeWishlist.slice();
-        completeWishlist.splice(index,1)
-        this.setState({completeWishlist: completeWishlist})
-        thisUser.set({completeWishlist});
+  useEffect(() => {
+    const thisUser = usersWishlist.child(userid);
+    const onDataChange = (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setCompleteWishlist(data.completeWishlist || []);
+      }
+    };
 
-    }
+    thisUser.on("value", onDataChange);
 
-    addWishlist = ()=> {
-        const {userid} = this.props;
-        const thisUser = usersWishlist.child(userid);
-        const {wishlist} = this.state;
-        const {completeWishlist} = this.state;
-        completeWishlist.push(wishlist);
-        this.setState({completeWishlist: completeWishlist})
-        thisUser.set({completeWishlist});
+    return () => {
+      thisUser.off("value", onDataChange);
+    };
+  }, [userid]);
 
-    }
+  const renderWishlist = () => {
+    return completeWishlist.map((item, index) => {
+      return (
+        <li className="list-group-item" key={index}>
+          {item}
+          <button
+            className="btn btn-danger"
+            style={{ margin: "10px" }}
+            onClick={() => removeWishlist(index)}
+          >
+            Delete
+          </button>
+        </li>
+      );
+    });
+  };
 
-
-    componentDidMount() {
-        const {userid} = this.props;
-        const thisUser = usersWishlist.child(userid);
-        thisUser.on('value', (snap, i)=> {
-            snap.forEach((d, i)=> this.setState({completeWishlist: d.val()}))
-
-        })
-
-    }
-
-    renderWishlist() {
-        return this.state.completeWishlist.map((item, index)=> {
-            return (
-                <li className="list-group-item" key={index}>{item}
-                    <button className="btn btn-danger" style={{margin: '10px'}}
-                            onClick={this.removeWishlist.bind(this,index)}> Delete
-                    </button>
-
-                </li>
-            )
-        })
-
-    }
-
-
-    render() {
-        console.log(this.state)
-        return (
-
-            <div className="container" style={{margin: '5%'}}>
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="form-group">
-                            <input className="form-control"
-                                   placeholder="What is your Wishlist ?"
-                                   onChange={({target})=>this.setState({wishlist: target.value})}
-                            />
-                            <button className="btn btn-primary"
-                                    style={{margin: '15px'}}
-                                    onClick={this.addWishlist}
-                            >Add To Wishlist
-                            </button>
-                        </div>
-                    </div>
-                    <div className="col-md-6">
-                        <ul className="list-group">
-                            {this.renderWishlist()}
-
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-
-
-        )
-
-
-    }
-
-
-}
+  return (
+    <div className="container" style={{ margin: "5%" }}>
+      <div className="row">
+        <div className="col-md-6">
+          <div className="form-group">
+            <input
+              className="form-control"
+              placeholder="What is your Wishlist ?"
+              onChange={(e) => setWishlist(e.target.value)}
+            />
+            <button
+              className="btn btn-primary"
+              style={{ margin: "15px" }}
+              onClick={addWishlist}
+            >
+              Add To Wishlist
+            </button>
+          </div>
+        </div>
+        <div className="col-md-6">
+          <ul className="list-group">{renderWishlist()}</ul>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default Dashboard;
