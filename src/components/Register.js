@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { firebaseApp, users } from "../Firebase";
+import { firebaseApp
+  
+  , 
+  
+  users 
+
+} from "../Firebase";
 
 const Register = () => {
   const [email, setEmail] = useState("");
