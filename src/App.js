@@ -35,7 +35,12 @@ const App = () => {
   };
 
   return (
+
+    // <div>Hi there</div>
     <HashRouter>
+
+
+
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
@@ -105,7 +110,9 @@ const App = () => {
           />
           <Route path="/register" component={Register} />
         </div>
-      </div>
+      </div> 
+
+
     </HashRouter>
   );
 };
